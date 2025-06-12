@@ -103,11 +103,14 @@ module.exports.getsuggestions=async (input)=>{
     }
     const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}`;
     try{
-        const response=await axios.get(url);
+        const response=await axios.get(url, { headers: {
+        'User-Agent': 'my-uber-app/1.0 (anandgoyal9171@gmail.com)' // ✅ REQUIRED
+      }});
         if (response.status===200){
+
         return response.data}
         else{
-            throw new Error('Failed to fetch suggestions')
+            throw new Error('Failed to fetch suggestions' +response.data)
         }
     }
     catch(error){
