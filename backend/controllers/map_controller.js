@@ -28,8 +28,12 @@ module.exports.getSuggestions =async (req,res)=>{
 
     try {
         const suggestions = await mapservice.getsuggestions(query);
+        console.log(suggestions);
+        console.log("suggestions getting")
         res.json({ suggestions });
       } catch (error) {
+        console.log(error);
+        console.log("eroor fro suggesstions")
         res.status(400).json({ error: error.message });
       }
 }

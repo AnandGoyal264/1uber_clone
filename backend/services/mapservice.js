@@ -110,7 +110,8 @@ module.exports.getsuggestions=async (input)=>{
 
         return response.data}
         else{
-          
+          console.log("handling")
+          console.log(response);
             throw new Error('Failed to fetch suggestions' +response)
         }
     }
