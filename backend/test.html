@@ -1,0 +1,27 @@
+<!-- test.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Socket.IO Test</h1>
+  <script>
+    const socket = io("http://localhost:3000"); // Replace PORT with your server port
+
+    socket.on('connect', () => {
+      console.log("Connected to server with ID:", socket.id);
+    });
+
+    socket.on('message', (msg) => {
+      console.log("Received message:", msg);
+    });
+
+    socket.on('disconnect', () => {
+      console.log("Disconnected from server");
+    });
+  </script>
+</body>
+</html>
