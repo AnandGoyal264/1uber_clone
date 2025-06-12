@@ -115,9 +115,16 @@ module.exports.getsuggestions=async (input)=>{
             throw new Error('Failed to fetch suggestions' +response)
         }
     }
-    catch(error){
-        throw new Error('Failed to fetch suggestions: '+error.message)
-    }
+    catch (error) {
+  if (error.response) {
+    console.error("💥 HTTP error code:", error.response.status);
+    console.error("💥 HTTP error data:", JSON.stringify(error.response.data));
+  } else {
+    console.error("💥 Request error:", error.message);
+  }
+  throw new Error('Failed to fetch suggestions: ' + (error.response?.status || error.message));
+}
+
 
 
 }
