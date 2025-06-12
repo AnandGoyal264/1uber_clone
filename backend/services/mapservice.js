@@ -97,37 +97,53 @@ module.exports.getDistanceTime = async (origin, destination) => {
     throw new Error('Failed to fetch coordinates or calculate distance: ' + error.message);
   }
 };
-module.exports.getsuggestions=async (input)=>{
-    if (!input){
-        throw new Error('Input is required');
-    }
-    const url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}`;
-    try{
-        const response=await axios.get(url, { headers: {
-        'User-Agent': 'my-uber-app/1.0 (anandgoyal9171@gmail.com)' // ✅ REQUIRED
-      }});
-        if (response.status===200){
 
-        return response.data}
-        else{
-          console.log("handling")
-          console.log(response);
-            throw new Error('Failed to fetch suggestions' +response)
-        }
-    }
-    catch (error) {
-  if (error.response) {
-    console.error("💥 HTTP error code:", error.response.status);
-    console.error("💥 HTTP error data:", JSON.stringify(error.response.data));
-  } else {
-    console.error("💥 Request error:", error.message);
+const cache = new Map();
+
+module.exports.getsuggestions = async (input) => {
+  if (!input) {
+    throw new Error('Input is required');
   }
-  throw new Error('Failed to fetch suggestions: ' + (error.response?.status || error.message));
-}
 
+  // Check cache
+  if (cache.has(input)) {
+    console.log("✅ Cache hit for:", input);
+    return cache.get(input);
+  }
 
+  // Respect Nominatim rate limit (max 1 req/sec)
+  await new Promise(resolve => setTimeout(resolve, 1100));
 
-}
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'my-uber-app/1.0 (anandgoyal9171@gmail.com)' // Replace with your contact
+      }
+    });
+
+    if (response.status === 200 && Array.isArray(response.data)) {
+      cache.set(input, response.data); // Save in cache
+      return response.data;
+    } else {
+      console.error("❌ Unexpected API response format:", response.data);
+      throw new Error('Unexpected response from Nominatim');
+    }
+
+  } catch (error) {
+    if (error.response) {
+      console.error("💥 HTTP error:", error.response.status);
+      console.error("💥 Response data:", JSON.stringify(error.response.data));
+    } else {
+      console.error("💥 Network/Request error:", error.message);
+    }
+
+    throw new Error(
+      `Failed to fetch suggestions: ${error.response?.status || error.message}`
+    );
+  }
+};
 module.exports.getCaptainRadius=async (ltd,lng,radius)=>{
   //console.log({ ltd, lng, radius });
   console.log("inside getCaptainRadius function");
