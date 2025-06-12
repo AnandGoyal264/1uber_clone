@@ -105,43 +105,18 @@ module.exports.getsuggestions = async (input) => {
     throw new Error('Input is required');
   }
 
-  // Check cache
-  if (cache.has(input)) {
-    console.log("✅ Cache hit for:", input);
-    return cache.get(input);
-  }
-
-  // Respect Nominatim rate limit (max 1 req/sec)
-  await new Promise(resolve => setTimeout(resolve, 1100));
-
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}`;
+  const accessToken = 'pk.215bb1b7314014d97112494713c6b272'; // 🔁 Replace this with your actual token
+  const url = `https://api.locationiq.com/v1/autocomplete?key=${accessToken}&q=${encodeURIComponent(input)}&format=json`;
 
   try {
-    const response = await axios.get(url, {
-      headers: {
-        'User-Agent': 'my-uber-app/1.0 (anandgoyal9171@gmail.com)' // Replace with your contact
-      }
-    });
-
-    if (response.status === 200 && Array.isArray(response.data)) {
-      cache.set(input, response.data); // Save in cache
+    const response = await axios.get(url);
+    if (response.status === 200) {
       return response.data;
     } else {
-      console.error("❌ Unexpected API response format:", response.data);
-      throw new Error('Unexpected response from Nominatim');
+      throw new Error('Failed to fetch suggestions');
     }
-
   } catch (error) {
-    if (error.response) {
-      console.error("💥 HTTP error:", error.response.status);
-      console.error("💥 Response data:", JSON.stringify(error.response.data));
-    } else {
-      console.error("💥 Network/Request error:", error.message);
-    }
-
-    throw new Error(
-      `Failed to fetch suggestions: ${error.response?.status || error.message}`
-    );
+    throw new Error('Failed to fetch suggestions: ' + error.message);
   }
 };
 module.exports.getCaptainRadius=async (ltd,lng,radius)=>{
